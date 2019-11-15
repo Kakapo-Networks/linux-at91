@@ -485,7 +485,8 @@ static int jc42_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	struct device *hwmon_dev;
 	struct jc42_data *data;
 	int config, cap;
-
+	
+	dev_info(dev, "Probing JC42 devices.\n");
 	data = devm_kzalloc(dev, sizeof(struct jc42_data), GFP_KERNEL);
 	if (!data)
 		return -ENOMEM;
@@ -495,9 +496,10 @@ static int jc42_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	mutex_init(&data->update_lock);
 
 	cap = i2c_smbus_read_word_swapped(client, JC42_REG_CAP);
-	if (cap < 0)
+	if (cap < 0) {
+		dev_err(dev, "JC32 cap read failed.\n");
 		return cap;
-
+	}
 	data->extended = !!(cap & JC42_CAP_RANGE);
 
 	if (device_property_read_bool(dev, "smbus-timeout-disable")) {
@@ -517,9 +519,10 @@ static int jc42_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	}
 
 	config = i2c_smbus_read_word_swapped(client, JC42_REG_CONFIG);
-	if (config < 0)
+	if (config < 0) {
+		dev_err(dev, "JC32 config failed.\n");
 		return config;
-
+	}
 	data->orig_config = config;
 	if (config & JC42_CFG_SHUTDOWN) {
 		config &= ~JC42_CFG_SHUTDOWN;
@@ -530,6 +533,7 @@ static int jc42_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	hwmon_dev = devm_hwmon_device_register_with_info(dev, client->name,
 							 data, &jc42_chip_info,
 							 NULL);
+	dev_info(dev, "JC32 device probe completed.\n");
 	return PTR_ERR_OR_ZERO(hwmon_dev);
 }
 

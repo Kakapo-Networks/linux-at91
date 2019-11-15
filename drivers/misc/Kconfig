@@ -489,6 +489,34 @@ config MISC_RTSX
 	tristate
 	default MISC_RTSX_PCI || MISC_RTSX_USB
 
+config OC_CA
+       tristate "Opencellular Cellular Amplifire driver."
+       default y
+       help
+          OC CA driver for config, control and status.
+
+config OC_CA_ATTN
+       tristate "OpenCellular CA attenuation config."
+       depends on OC_CA
+       default y
+       help
+         Configure CA TX and RX attenuation levels.
+
+config OC_CA_CTRL
+       tristate "OpenCellular CA Controls."
+       depends on OC_CA
+       default y
+       help
+         OpenCellular CA control for enabling and disbaling devices on CA.
+
+config OC_CA_STAT
+       tristate "OpenCellular CA Status."
+       depends on OC_CA
+       default y
+       help
+         OpenCellular CA status report power goods and alerts on CA.
+  
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"

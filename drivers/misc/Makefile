@@ -58,3 +58,6 @@ obj-$(CONFIG_ASPEED_LPC_SNOOP)	+= aspeed-lpc-snoop.o
 obj-$(CONFIG_PCI_ENDPOINT_TEST)	+= pci_endpoint_test.o
 obj-$(CONFIG_OCXL)		+= ocxl/
 obj-$(CONFIG_MISC_RTSX)		+= cardreader/
+obj-$(CONFIG_OC_CA_ATTN)          += oc_ca_att.o
+obj-$(CONFIG_OC_CA_CTRL)          += oc_ca_ctrl.o
+obj-$(CONFIG_OC_CA_STAT)          += oc_ca_status.o

@@ -194,8 +194,9 @@ static int ads1015_get_channels_config_of(struct i2c_client *client)
 			dev_err(&client->dev, "invalid reg on %pOF\n", node);
 			continue;
 		}
-
 		channel = pval;
+		dev_info(&client->dev, "Channel index %d %pOF\n",
+			channel, node);
 		if (channel >= ADS1015_CHANNELS) {
 			dev_err(&client->dev,
 				"invalid channel index %d on %pOF\n",
@@ -205,6 +206,8 @@ static int ads1015_get_channels_config_of(struct i2c_client *client)
 
 		if (!of_property_read_u32(node, "ti,gain", &pval)) {
 			pga = pval;
+			dev_info(&client->dev, "Gain %d %pOF\n",
+				pga, node);	
 			if (pga > 6) {
 				dev_err(&client->dev, "invalid gain on %pOF\n",
 					node);
@@ -214,6 +217,8 @@ static int ads1015_get_channels_config_of(struct i2c_client *client)
 
 		if (!of_property_read_u32(node, "ti,datarate", &pval)) {
 			data_rate = pval;
+			dev_info(&client->dev, "Data rate %d %pOF\n",
+				data_rate, node );	
 			if (data_rate > 7) {
 				dev_err(&client->dev,
 					"invalid data_rate on %pOF\n", node);
@@ -263,6 +268,7 @@ static int ads1015_probe(struct i2c_client *client,
 	int err;
 	unsigned int k;
 
+	dev_info(&client->dev, "Probing ADS101X device.\n");
 	data = devm_kzalloc(&client->dev, sizeof(struct ads1015_data),
 			    GFP_KERNEL);
 	if (!data)
@@ -275,23 +281,29 @@ static int ads1015_probe(struct i2c_client *client,
 		data->id = id->driver_data;
 	i2c_set_clientdata(client, data);
 	mutex_init(&data->update_lock);
-
+	
 	/* build sysfs attribute group */
 	ads1015_get_channels_config(client);
+	
+	dev_info(&client->dev, "Config done ADS101X device.\n");
+	
 	for (k = 0; k < ADS1015_CHANNELS; ++k) {
 		if (!data->channel_data[k].enabled)
 			continue;
 		err = device_create_file(&client->dev, &ads1015_in[k].dev_attr);
-		if (err)
+		if (err) {
+			dev_err(&client->dev, "Failed creating file for ADS101X.\n");
 			goto exit_remove;
+		}
 	}
 
 	data->hwmon_dev = hwmon_device_register(&client->dev);
 	if (IS_ERR(data->hwmon_dev)) {
 		err = PTR_ERR(data->hwmon_dev);
+		dev_err(&client->dev, "Failed registering ADS101X to hwmon.\n");
 		goto exit_remove;
 	}
-
+	dev_info(&client->dev, "Probe completed for ADS101X.\n");
 	return 0;
 
 exit_remove:
